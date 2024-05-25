@@ -1,15 +1,19 @@
 import express from "express";
 import {
-  formularioLogin,
-  formularioRegistro,
-  formularioOlvidePassword,
+    loginForm,
+    registerForm,
+    register,
+    confirm,
+    forgotPasswordForm,
 } from "../controllers/userController.js";
 
 const router = express.Router();
 
-router.get("/login", formularioLogin);
-router.get("/registro", formularioRegistro);
-router.get("/olvide-password", formularioOlvidePassword);
+router.get("/login", loginForm);
+router.get("/register", registerForm);
+router.post("/register", register);
+router.get("/confirm/:token", confirm);
+router.get("/forgot-password", forgotPasswordForm);
 
 // router
 //   .route("/")
