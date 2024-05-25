@@ -1,4 +1,13 @@
+import jwt from "jsonwebtoken";
+// import dotenv from "dotenv";
+
+// dotenv.config({ path: ".env" });
+
 const generateId = () =>
     Math.random().toString(32).substring(2) + Date.now().toString(32);
+const generateJWT = (data) =>
+    jwt.sign({ id: data.id, name: data.name }, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+    });
 
-export { generateId };
+export { generateId, generateJWT };

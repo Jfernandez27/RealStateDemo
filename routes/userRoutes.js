@@ -1,6 +1,7 @@
 import express from "express";
 import {
     loginForm,
+    authenticate,
     registerForm,
     register,
     confirm,
@@ -13,9 +14,13 @@ import {
 const router = express.Router();
 
 router.get("/login", loginForm);
+router.post("/login", authenticate);
+
 router.get("/register", registerForm);
 router.post("/register", register);
+
 router.get("/confirm/:token", confirm);
+
 router.get("/passwordRecovery", forgotPasswordForm);
 router.post("/passwordRecovery", resetPassword);
 
