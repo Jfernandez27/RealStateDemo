@@ -1,7 +1,8 @@
 import { check, validationResult } from "express-validator";
+import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import { generateId } from "../helpers/tokens.js";
-import { emailRegister } from "../helpers/emails.js";
+import { passwordResetEmail, registerEmail } from "../helpers/emails.js";
 
 const loginForm = (req, res) => {
     res.render("auth/login", {
@@ -28,18 +29,11 @@ const register = async (req, res) => {
         .isLength({ min: 6 })
         .withMessage("El password debe ser de al menos 6 caracteres")
         .run(req);
-    // await check("password_confirm")
-    //     .equals("password")
-    //     .withMessage("Los password no son iguales")
-    //     .run(req);
 
     let result = validationResult(req);
 
     //Verificar que no el resultado de las validaciones esté OK
     if (!result.isEmpty()) {
-        //Errores
-        // res.json(result.array());
-        console.log(result.array());
         return res.render("auth/register", {
             title: "Crear Cuenta",
             csrfToken: req.csrfToken(),
@@ -85,8 +79,8 @@ const register = async (req, res) => {
         token: generateId(),
     });
 
-    //Envíio de Email
-    emailRegister({
+    //Envío de Email
+    registerEmail({
         name: user.name,
         email: user.email,
         token: user.token,
@@ -124,9 +118,118 @@ const confirm = async (req, res) => {
 };
 
 const forgotPasswordForm = (req, res) => {
-    res.render("auth/forgot-password", {
-        title: "Olvidé mi Password",
+    res.render("auth/passwordRecovery", {
+        title: "Reestablece tu Password",
+        csrfToken: req.csrfToken(),
     });
 };
 
-export { loginForm, registerForm, register, confirm, forgotPasswordForm };
+const resetPassword = async (req, res) => {
+    //Validaciones
+    await check("email")
+        .isEmail()
+        .withMessage("Debe ser un email válido")
+        .run(req);
+    let result = validationResult(req);
+    if (!result.isEmpty()) {
+        return res.render("auth/passwordRecovery", {
+            title: "Reestablece tu Password",
+            csrfToken: req.csrfToken(),
+            errors: result.array(),
+        });
+    }
+    //Buscar usuario
+    const { email } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+        return res.render("auth/passwordRecovery", {
+            title: "El usuario no existe",
+            csrfToken: req.csrfToken(),
+            errors: [{ msg: "El email no está registrado." }],
+        });
+    }
+
+    //Generar un token y enviar el email
+    user.token = generateId();
+    await user.save();
+
+    passwordResetEmail({
+        name: user.name,
+        email: user.email,
+        token: user.token,
+    });
+
+    res.render("templates/message", {
+        title: "Reestablece tu Password",
+        message: "Hemos enviado un email con las instrucciones",
+    });
+};
+const tokenCheck = async (req, res) => {
+    const { token } = req.params;
+
+    //Verificar si el token es valido
+    const user = await User.findOne({ where: { token } });
+    if (!user) {
+        return res.render("auth/confirm", {
+            title: "Reestablece tu Password",
+            message:
+                "Hubo un error al reestablecer tu password, intenta de nuevo",
+            error: true,
+        });
+    }
+
+    //Mostrar vista para nuevo password
+    // user.token = null;
+    // await user.save();
+    res.render("auth/passwordReset", {
+        title: "Reestablece tu Password",
+        csrfToken: req.csrfToken(),
+    });
+};
+const newPassword = async (req, res) => {
+    //Validations
+    await check("password")
+        .isLength({ min: 6 })
+        .withMessage("El password debe ser de al menos 6 caracteres")
+        .run(req);
+    let result = validationResult(req);
+    if (!result.isEmpty()) {
+        return res.render("auth/passwordReset", {
+            title: "Reestablece tu Password",
+            csrfToken: req.csrfToken(),
+            errors: result.array(),
+        });
+    }
+    // Validate passwords
+    const { password, password_confirm } = req.body;
+    if (password !== password_confirm) {
+        return res.render("auth/passwordReset", {
+            title: "Reestablece tu Password",
+            csrfToken: req.csrfToken(),
+            errors: [{ msg: "Los password no son iguales" }],
+        });
+    }
+    //Get User
+    const { token } = req.params;
+    const user = await User.findOne({ where: { token } });
+
+    //Update Password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.token = null;
+    await user.save();
+    return res.render("auth/confirm", {
+        title: "Password Reestablecido",
+        message: "El password se reestableció correctamente",
+    });
+};
+export {
+    loginForm,
+    registerForm,
+    register,
+    confirm,
+    forgotPasswordForm,
+    resetPassword,
+    tokenCheck,
+    newPassword,
+};
