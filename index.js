@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import db from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
+import propertyRoutes from "./routes/propertyRoutes.js";
 
 dotenv.config({ path: ".env" });
 
@@ -38,6 +39,7 @@ app.use(express.static("public"));
 
 //Routing
 app.use("/auth", userRoutes);
+app.use("/", propertyRoutes);
 
 //Definir un puerto y arrancar el proyecto
 const port = process.env.PORT || 3000;
