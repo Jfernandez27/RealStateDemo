@@ -1,11 +1,11 @@
-import { Datatypes } from "sequelize";
+import Datatypes from "sequelize";
 import db from "../config/db.js";
 
-const Prices = db.define("prices", {
-    price: {
+const Price = db.define("price", {
+    name: {
         type: Datatypes.STRING(50),
         allowNull: false,
     },
 });
 
-export default Prices;
+export default Price;

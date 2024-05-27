@@ -10,7 +10,7 @@
     "css": "postcss public/css/tailwind.css -o public/css/app.css --watch",
     "js": "webpack --watch",
     "dev":"concurrently \"npm run css\" \"npm run js\" ",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "seed": "node ./seeds/seeder.js"
   },
   "keywords": [
     "MVC",

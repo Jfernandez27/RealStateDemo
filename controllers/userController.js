@@ -72,6 +72,7 @@ const authenticate = async (req, res) => {
     return res
         .cookie("_token", token, {
             httpOnly: true,
+            // expires: 3600,
             // secure: true
         })
         .redirect("/myProperties");
