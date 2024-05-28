@@ -1,10 +1,27 @@
 import { validationResult } from "express-validator";
 import { Property, Category, Price } from "../models/index.js";
 
-const admin = (req, res) => {
+const admin = async (req, res) => {
+    const { id } = req.user;
+    const properties = await Property.findAll({
+        where: {
+            userId: id,
+        },
+        include: [
+            {
+                model: Category,
+                as: "category",
+            },
+            {
+                model: Price,
+                as: "price",
+            },
+        ],
+    });
     res.render("properties/admin", {
         title: "Mis propiedades",
         header: true,
+        properties,
     });
 };
 
