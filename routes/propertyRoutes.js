@@ -1,7 +1,14 @@
 import express from "express";
 import { body } from "express-validator";
 import protectRoute from "../middlewares/protectRoute.js";
-import { admin, create, save } from "../controllers/propertyController.js";
+import upload from "../middlewares/saveImage.js";
+import {
+    admin,
+    create,
+    save,
+    addImage,
+    saveImage,
+} from "../controllers/propertyController.js";
 
 const router = express.Router();
 
@@ -32,6 +39,13 @@ router.post(
         .withMessage("Seleccione la cantidad de estacionamientos"),
     body("lat").notEmpty().withMessage("Ubica la Propiedad en el Mapa"),
     save
+);
+router.get("/properties/addImage/:id", protectRoute, addImage);
+router.post(
+    "/properties/addImage/:id",
+    protectRoute,
+    upload.single("image"),
+    saveImage
 );
 
 export default router;

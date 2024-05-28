@@ -29,7 +29,6 @@
             .reverse()
             .latlng(position, 12)
             .run(function (error, res) {
-                // console.log(res);
                 if (error) {
                     console.log("Error: " + error);
                 }

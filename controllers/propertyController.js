@@ -21,7 +21,6 @@ const create = async (req, res) => {
     // ]);
     res.render("properties/create", {
         title: "Crear Propiedad",
-        header: true,
         csrfToken: req.csrfToken(),
         categories,
         prices,
@@ -36,7 +35,6 @@ const save = async (req, res) => {
     if (!result.isEmpty()) {
         res.render("properties/create", {
             title: "Crear Propiedad",
-            header: true,
             csrfToken: req.csrfToken(),
             categories,
             prices,
@@ -85,4 +83,56 @@ const save = async (req, res) => {
         console.log(error);
     }
 };
-export { admin, create, save };
+
+const addImage = async (req, res) => {
+    const { id } = req.params;
+
+    //Validations
+    const property = await Property.findByPk(id);
+    if (!property) {
+        return res.redirect("/myProperties");
+    }
+
+    if (property.published) {
+        return res.redirect("/myProperties");
+    }
+
+    if (property.userId !== req.user.id) {
+        return res.redirect("/myProperties");
+    }
+
+    //Render View
+    res.render("properties/addImage", {
+        title: `Agregar Imagen: ${property.headline}`,
+        csrfToken: req.csrfToken(),
+        property,
+    });
+};
+const saveImage = async (req, res, next) => {
+    //Validations
+    const { id } = req.params;
+
+    //Validations
+    const property = await Property.findByPk(id);
+    if (!property) {
+        return res.redirect("/myProperties");
+    }
+
+    if (property.published) {
+        return res.redirect("/myProperties");
+    }
+
+    if (property.userId !== req.user.id) {
+        return res.redirect("/myProperties");
+    }
+    try {
+        //Save image & publish property
+        property.image = req.file.filename;
+        property.published = 1;
+        await property.save();
+        next();
+    } catch (error) {
+        console.log(error);
+    }
+};
+export { admin, create, save, addImage, saveImage };
