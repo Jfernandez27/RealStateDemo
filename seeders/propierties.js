@@ -39,12 +39,12 @@ const descriptions = [
 const cities = [
     { city: "Santiago", lat: -33.4489, lng: -70.6693 },
     { city: "Valparaíso", lat: -33.0458, lng: -71.6197 },
-    { city: "Concepción", lat: -36.8201, lng: -73.0443 },
-    { city: "La Serena", lat: -29.9027, lng: -71.2519 },
-    { city: "Antofagasta", lat: -23.65, lng: -70.4 },
-    { city: "Temuco", lat: -38.7359, lng: -72.5904 },
-    { city: "Iquique", lat: -20.2141, lng: -70.1523 },
-    { city: "Punta Arenas", lat: -53.1638, lng: -70.9171 },
+    // { city: "Concepción", lat: -36.8201, lng: -73.0443 },
+    // { city: "La Serena", lat: -29.9027, lng: -71.2519 },
+    // { city: "Antofagasta", lat: -23.65, lng: -70.4 },
+    // { city: "Temuco", lat: -38.7359, lng: -72.5904 },
+    // { city: "Iquique", lat: -20.2141, lng: -70.1523 },
+    // { city: "Punta Arenas", lat: -53.1638, lng: -70.9171 },
 ];
 
 const propertiesSeeder = {
