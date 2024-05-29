@@ -8,6 +8,9 @@ import {
     save,
     addImage,
     saveImage,
+    edit,
+    update,
+    deleting,
 } from "../controllers/propertyController.js";
 
 const router = express.Router();
@@ -47,5 +50,10 @@ router.post(
     upload.single("image"),
     saveImage
 );
+
+router.get("/properties/edit/:id", protectRoute, edit);
+router.post("/properties/edit/:id", protectRoute, update);
+
+router.post("/properties/delete/:id", protectRoute, deleting);
 
 export default router;

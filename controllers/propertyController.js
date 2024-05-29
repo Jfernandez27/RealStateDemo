@@ -1,5 +1,6 @@
-import { validationResult } from "express-validator";
+import { check, validationResult } from "express-validator";
 import { Property, Category, Price } from "../models/index.js";
+import { unlink } from "node:fs/promises";
 
 const admin = async (req, res) => {
     const { id } = req.user;
@@ -20,7 +21,7 @@ const admin = async (req, res) => {
     });
     res.render("properties/admin", {
         title: "Mis propiedades",
-        header: true,
+        csrfToken: req.csrfToken(),
         properties,
     });
 };
@@ -31,7 +32,7 @@ const [categories, prices] = await Promise.all([
 ]);
 
 const create = async (req, res) => {
-    //Get Categories & prices
+    // // Get Categories & prices
     // const [categories, prices] = await Promise.all([
     //     Category.findAll(),
     //     Price.findAll(),
@@ -152,4 +153,136 @@ const saveImage = async (req, res, next) => {
         console.log(error);
     }
 };
-export { admin, create, save, addImage, saveImage };
+
+const edit = async (req, res) => {
+    const { id } = req.params;
+    //validations
+    const property = await Property.findByPk(id);
+    if (!property) {
+        return res.redirect("/myProperties");
+    }
+
+    if (property.userId !== req.user.id) {
+        return res.redirect("/myProperties");
+    }
+
+    res.render("properties/edit", {
+        title: "Editar Propiedad",
+        csrfToken: req.csrfToken(),
+        categories,
+        prices,
+        property,
+    });
+};
+
+const update = async (req, res) => {
+    //Validations
+    await check("headline")
+        .notEmpty()
+        .withMessage("El titular de la Propiedad es obligatorio")
+        .run(req);
+    await check("description")
+        .notEmpty()
+        .withMessage("La descripcion no debe estar vacia")
+        .isLength({ max: 1000 })
+        .withMessage("La descripcion no puede tener mas de 1000 carácteres")
+        .run(req);
+    await check("category")
+        .isNumeric()
+        .withMessage("Seleccione una categoria")
+        .run(req);
+    await check("price")
+        .isNumeric()
+        .withMessage("Seleccione un rango de precios")
+        .run(req);
+    await check("bedrooms")
+        .isNumeric()
+        .withMessage("Seleccione la cantidad de dormitorios")
+        .run(req);
+    await check("bathrooms")
+        .isNumeric()
+        .withMessage("Seleccione la cantidad de baños")
+        .run(req);
+    await check("parkings")
+        .isNumeric()
+        .withMessage("Seleccione la cantidad de estacionamientos")
+        .run(req);
+    await check("lat")
+        .notEmpty()
+        .withMessage("Ubica la Propiedad en el Mapa")
+        .run(req);
+    let result = validationResult(req);
+
+    if (!result.isEmpty()) {
+        return res.render("properties/edit", {
+            title: "Editar Propiedad",
+            csrfToken: req.csrfToken(),
+            categories,
+            prices,
+            errors: result.array(),
+            property: req.body,
+        });
+    }
+    const { id } = req.params;
+    //validations
+    const property = await Property.findByPk(id);
+    if (!property) {
+        return res.redirect("/myProperties");
+    }
+
+    if (property.userId !== req.user.id) {
+        return res.redirect("/myProperties");
+    }
+    //Update property
+    const {
+        headline,
+        description,
+        bedrooms,
+        bathrooms,
+        parkings,
+        street,
+        lat,
+        lng,
+        category: categoryId,
+        price: priceId,
+    } = req.body;
+
+    try {
+        property.set({
+            headline,
+            description,
+            bedrooms,
+            bathrooms,
+            parkings,
+            street,
+            lat,
+            lng,
+            categoryId,
+            priceId,
+        });
+        await property.save();
+        res.redirect("/myProperties");
+    } catch (error) {
+        console.log(error);
+    }
+};
+const deleting = async (req, res) => {
+    const { id } = req.params;
+    //validations
+    const property = await Property.findByPk(id);
+    if (!property) {
+        return res.redirect("/myProperties");
+    }
+
+    if (property.userId !== req.user.id) {
+        return res.redirect("/myProperties");
+    }
+
+    //Delete Image
+    await unlink(`public/uploads/${property.image}`);
+
+    // Delete Property
+    property.destroy();
+    res.redirect("/myProperties");
+};
+export { admin, create, save, addImage, saveImage, edit, update, deleting };
