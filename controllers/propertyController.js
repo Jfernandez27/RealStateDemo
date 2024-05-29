@@ -1,6 +1,7 @@
 import { check, validationResult } from "express-validator";
 import { Property, Category, Price } from "../models/index.js";
 import { unlink } from "node:fs/promises";
+import { title } from "node:process";
 
 const admin = async (req, res) => {
     const { id } = req.user;
@@ -285,4 +286,40 @@ const deleting = async (req, res) => {
     property.destroy();
     res.redirect("/myProperties");
 };
-export { admin, create, save, addImage, saveImage, edit, update, deleting };
+
+const view = async (req, res) => {
+    const { id } = req.params;
+
+    const property = await Property.findByPk(id, {
+        include: [
+            {
+                model: Category,
+                as: "category",
+            },
+            {
+                model: Price,
+                as: "price",
+            },
+        ],
+    });
+
+    if (!property) {
+        return res.redirect("/404");
+    }
+
+    res.render("properties/view", {
+        title: property.headline,
+        property,
+    });
+};
+export {
+    admin,
+    create,
+    save,
+    addImage,
+    saveImage,
+    edit,
+    update,
+    deleting,
+    view,
+};

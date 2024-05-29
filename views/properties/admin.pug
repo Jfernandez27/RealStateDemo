@@ -16,7 +16,7 @@ block container
                                     img(src=`uploads/${property.image}`, alt=`Imagen ${property.headline}` class="w-full block")
 
                                 div(class="sm:w-2/4 md:w-3/6 lg:w-4/6 space-y-3") 
-                                    a(href="" class="block text-2xl font-extrabold text-indigo-600 truncate")= property.headline
+                                    a(href=`/property/${property.id}` class="block text-2xl font-extrabold text-indigo-600 truncate")= property.headline
 
                                     p(class="text-sm text-black font-bold")=property.category.name
                                     p(class="text-sm text-gray-500 font-bold flex items-center")

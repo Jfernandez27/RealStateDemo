@@ -3,6 +3,7 @@ export default {
     mode: "development",
     entry: {
         map: "./src/js/map.js",
+        mapView: "./src/js/mapView.js",
         addImage: "./src/js/addImage.js",
     },
     output: {

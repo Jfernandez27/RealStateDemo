@@ -11,6 +11,7 @@ import {
     edit,
     update,
     deleting,
+    view,
 } from "../controllers/propertyController.js";
 
 const router = express.Router();
@@ -55,5 +56,8 @@ router.get("/properties/edit/:id", protectRoute, edit);
 router.post("/properties/edit/:id", protectRoute, update);
 
 router.post("/properties/delete/:id", protectRoute, deleting);
+
+//Public Area
+router.get("/property/:id", view);
 
 export default router;
