@@ -1,30 +1,54 @@
 import { check, validationResult } from "express-validator";
 import { Property, Category, Price } from "../models/index.js";
 import { unlink } from "node:fs/promises";
-import { title } from "node:process";
 
 const admin = async (req, res) => {
-    const { id } = req.user;
-    const properties = await Property.findAll({
-        where: {
-            userId: id,
-        },
-        include: [
-            {
-                model: Category,
-                as: "category",
-            },
-            {
-                model: Price,
-                as: "price",
-            },
-        ],
-    });
-    res.render("properties/admin", {
-        title: "Mis propiedades",
-        csrfToken: req.csrfToken(),
-        properties,
-    });
+    //Validate queryString page
+    const { page } = req.query;
+    const regEx = /^[0-9]$/;
+    if (!regEx.test(page)) {
+        return res.redirect("/myProperties?page=1");
+    }
+    try {
+        const { id } = req.user;
+
+        //Limit & Offset
+        const limit = 5;
+        const offset = page * limit - limit;
+
+        const [properties, total] = await Promise.all([
+            Property.findAll({
+                limit,
+                offset,
+                where: {
+                    userId: id,
+                },
+                include: [
+                    {
+                        model: Category,
+                        as: "category",
+                    },
+                    {
+                        model: Price,
+                        as: "price",
+                    },
+                ],
+            }),
+            Property.count({ where: { userId: id } }),
+        ]);
+        res.render("properties/admin", {
+            title: "Mis propiedades",
+            csrfToken: req.csrfToken(),
+            properties,
+            pages: Math.ceil(total / limit),
+            page: Number(page),
+            total,
+            limit,
+            offset,
+        });
+    } catch (error) {
+        console.log(error);
+    }
 };
 
 const [categories, prices] = await Promise.all([
