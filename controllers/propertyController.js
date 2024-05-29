@@ -1,6 +1,7 @@
-import { check, validationResult } from "express-validator";
-import { Property, Category, Price } from "../models/index.js";
 import { unlink } from "node:fs/promises";
+import { check, validationResult } from "express-validator";
+import { Property, Category, Price, Message, User } from "../models/index.js";
+import { isSeller, dateFormat } from "../helpers/commons.js";
 
 const admin = async (req, res) => {
     //Validate queryString page
@@ -31,6 +32,10 @@ const admin = async (req, res) => {
                     {
                         model: Price,
                         as: "price",
+                    },
+                    {
+                        model: Message,
+                        as: "messages",
                     },
                 ],
             }),
@@ -334,6 +339,91 @@ const view = async (req, res) => {
     res.render("properties/view", {
         title: property.headline,
         property,
+        csrfToken: req.csrfToken(),
+        user: req.user,
+        isSeller: isSeller(req.user?.id, property.userId),
+    });
+};
+
+const sendMessage = async (req, res) => {
+    const { id } = req.params;
+
+    const property = await Property.findByPk(id, {
+        include: [
+            {
+                model: Category,
+                as: "category",
+            },
+            {
+                model: Price,
+                as: "price",
+            },
+        ],
+    });
+
+    if (!property) {
+        return res.redirect("/404");
+    }
+
+    let result = validationResult(req);
+
+    if (!result.isEmpty()) {
+        return res.render("properties/view", {
+            title: property.headline,
+            property,
+            csrfToken: req.csrfToken(),
+            user: req.user,
+            isSeller: isSeller(req.user?.id, property.userId),
+            errors: result.array(),
+        });
+    }
+
+    const { message: text } = req.body;
+    const { id: propertyId } = req.params;
+    const { id: userId } = req.user;
+
+    await Message.create({
+        text,
+        propertyId,
+        userId,
+    });
+
+    //TODO: send Email to seller
+
+    return res.render("properties/view", {
+        title: property.headline,
+        property,
+        csrfToken: req.csrfToken(),
+        user: req.user,
+        isSeller: isSeller(req.user?.id, property.userId),
+        send: true,
+    });
+};
+
+const readMessage = async (req, res) => {
+    const { id } = req.params;
+    //validations
+    const property = await Property.findByPk(id, {
+        include: [
+            {
+                model: Message,
+                as: "messages",
+                include: [{ model: User.scope("hidden"), as: "user" }],
+            },
+        ],
+    });
+    if (!property) {
+        return res.redirect("/myProperties");
+    }
+
+    if (property.userId !== req.user.id) {
+        return res.redirect("/myProperties");
+    }
+
+    res.render("properties/messages", {
+        title: "Mensajes ",
+        messages: property.messages,
+        dateFormat,
     });
 };
 export {
@@ -346,4 +436,6 @@ export {
     update,
     deleting,
     view,
+    sendMessage,
+    readMessage,
 };

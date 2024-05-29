@@ -13,7 +13,7 @@ const router = express.Router();
 router.get("/", home);
 
 //Categories
-router.get("/categories/:id", categories);
+router.get("/category/:id", categories);
 
 //404 Page
 router.get("/404", notFound);

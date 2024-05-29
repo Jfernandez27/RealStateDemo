@@ -1,6 +1,7 @@
 import express from "express";
 import { body } from "express-validator";
 import protectRoute from "../middlewares/protectRoute.js";
+import userIdentify from "../middlewares/userIdentify.js";
 import upload from "../middlewares/saveImage.js";
 import {
     admin,
@@ -12,6 +13,8 @@ import {
     update,
     deleting,
     view,
+    sendMessage,
+    readMessage,
 } from "../controllers/propertyController.js";
 
 const router = express.Router();
@@ -57,7 +60,17 @@ router.post("/properties/edit/:id", protectRoute, update);
 
 router.post("/properties/delete/:id", protectRoute, deleting);
 
+router.get("/messages/:id", protectRoute, readMessage);
+
 //Public Area
-router.get("/property/:id", view);
+router.get("/property/:id", userIdentify, view);
+router.post(
+    "/property/:id",
+    userIdentify,
+    body("message")
+        .isLength({ min: 10 })
+        .withMessage("El mensaje no puede estar vacio"),
+    sendMessage
+);
 
 export default router;
