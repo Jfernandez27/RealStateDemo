@@ -10,10 +10,10 @@ const runSeeders = async () => {
         // await db.sync({ force: true }); //Borra todas las tablas
         // await Promise.all([categoriesSeeder.down(), pricesSeeder.down()]);
         await Promise.all([
-            // usersSeeder.up(),
-            // categoriesSeeder.up(),
-            // pricesSeeder.up(),
-            propertiesSeeder.up(),
+            usersSeeder.up(),
+            categoriesSeeder.up(),
+            pricesSeeder.up(),
+            // propertiesSeeder.up(),
         ]);
         console.log("All seeders have been executed successfully!");
     } catch (error) {
