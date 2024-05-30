@@ -332,7 +332,7 @@ const view = async (req, res) => {
         ],
     });
 
-    if (!property) {
+    if (!property || !property.published) {
         return res.redirect("/404");
     }
 
@@ -426,6 +426,35 @@ const readMessage = async (req, res) => {
         dateFormat,
     });
 };
+
+const updateState = async (req, res) => {
+    const { id } = req.params;
+    //validations
+    const property = await Property.findByPk(id, {
+        // include: [
+        //     {
+        //         model: Message,
+        //         as: "messages",
+        //         include: [{ model: User.scope("hidden"), as: "user" }],
+        //     },
+        // ],
+    });
+    if (!property) {
+        return res.redirect("/myProperties");
+    }
+
+    if (property.userId !== req.user.id) {
+        return res.redirect("/myProperties");
+    }
+    // Update
+    property.published = !property.published;
+
+    await property.save();
+
+    res.json({
+        result: true,
+    });
+};
 export {
     admin,
     create,
@@ -435,6 +464,7 @@ export {
     edit,
     update,
     deleting,
+    updateState,
     view,
     sendMessage,
     readMessage,

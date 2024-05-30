@@ -77,6 +77,10 @@ const authenticate = async (req, res) => {
         })
         .redirect("/myProperties");
 };
+
+const endSession = (req, res) => {
+    return res.clearCookie("_token").status(200).redirect("/auth/login");
+};
 const registerForm = (req, res) => {
     res.render("auth/register", {
         title: "Crear Cuenta",
@@ -294,6 +298,7 @@ const newPassword = async (req, res) => {
 export {
     loginForm,
     authenticate,
+    endSession,
     registerForm,
     register,
     confirm,

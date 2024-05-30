@@ -12,6 +12,7 @@ import {
     edit,
     update,
     deleting,
+    updateState,
     view,
     sendMessage,
     readMessage,
@@ -59,6 +60,8 @@ router.get("/properties/edit/:id", protectRoute, edit);
 router.post("/properties/edit/:id", protectRoute, update);
 
 router.post("/properties/delete/:id", protectRoute, deleting);
+
+router.put("/properties/:id", protectRoute, updateState);
 
 router.get("/messages/:id", protectRoute, readMessage);
 
