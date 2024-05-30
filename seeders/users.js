@@ -11,8 +11,14 @@ const usersSeeder = {
                 confirmed: 1,
             },
             {
-                name: "Juan Perez",
-                email: "juan@perez.com",
+                name: "Demo",
+                email: "demo@mail.com",
+                password: bcrypt.hashSync("123456", 10),
+                confirmed: 1,
+            },
+            {
+                name: "Demo 2",
+                email: "demo2@mail.com",
                 password: bcrypt.hashSync("123456", 10),
                 confirmed: 0,
             },
