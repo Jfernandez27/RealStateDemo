@@ -1,4 +1,5 @@
 import { unlink } from "node:fs/promises";
+import { promises as fsPromises, existsSync } from "fs";
 import { check, validationResult } from "express-validator";
 import { Property, Category, Price, Message, User } from "../models/index.js";
 import { isSeller, dateFormat } from "../helpers/commons.js";
@@ -309,7 +310,21 @@ const deleting = async (req, res) => {
     }
 
     //Delete Image
-    await unlink(`public/uploads/${property.image}`);
+    const imagePath = `public/uploads/${property.image}`;
+    if (fs.existsSync(imagePath)) {
+        try {
+            await fs.unlink(imagePath);
+            console.log(
+                `La imagen ${property.image} ha sido eliminada exitosamente.`
+            );
+        } catch (error) {
+            console.error(
+                `Error al eliminar la imagen ${property.image}: ${error.message}`
+            );
+        }
+    } else {
+        console.log(`La imagen ${property.image} no existe.`);
+    }
 
     // Delete Property
     property.destroy();
